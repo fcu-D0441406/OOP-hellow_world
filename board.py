@@ -1,5 +1,5 @@
 import numpy as np
-
+import copy
 
 class board:
     chess_map = list()
@@ -7,9 +7,9 @@ class board:
     width,height = None,None
     def __init__(self,width,height):
         self.width,self.height = width,height
-        for i in range(height+1):
+        for i in range(height):
             temp = list()
-            for j in range(width+1):
+            for j in range(width):
                 temp.append(0)
             self.chess_map.append(temp)
     
@@ -25,7 +25,7 @@ class board:
     
     def check_winner(self,width,height,player):
         def check_straight(width,height,player):
-            for i in range(self.height-5):
+            for i in range(self.height+1-5):
                 win = True
                 for j in range(5):
                     if(self.chess_map[i+j][width]!=player):
@@ -36,7 +36,7 @@ class board:
             return -1,0
                      
         def check_line(width,height,player):
-            for i in range(self.width-5):
+            for i in range(self.width+1-5):
                 win = True
                 for j in range(5):
                     if(self.chess_map[height][i+j]!=player):
@@ -65,15 +65,16 @@ class board:
                 return -1,0
                         
         def check_rl_oblique(width,height,player):
-            left = min(width,self.height-height)
             right = min(self.width-width,height)
+            left = min(width,self.height-height)
+            print(left,right,width,height)
             if(left+right<5):
                 return -1,0
             else:
                 for i in range(left+right):
                     win = True
                     for j in range(5):
-                        if(self.chess_map[height-right+i+j][width+right-i-j]!=player):
+                        if(self.chess_map[height-right-i+j][width+right+i-j]!=player):
                             win = False
                             break
                     if(win==True):
@@ -82,21 +83,114 @@ class board:
         
         a_state,a_winner = check_straight(width,height,player)
         b_state,b_winner = check_line(width,height,player)
-        c_state,c_winner = check_lr_oblique(width,height,player)
-        d_state,d_winner = check_rl_oblique(width,height,player)
-        if(a_state==1 or b_state==1 or c_state==1 or d_state==1):
+        #c_state,c_winner = check_lr_oblique(width,height,player)
+        #d_state,d_winner = check_rl_oblique(width,height,player)
+        if(a_state==1 or b_state==1): #or c_state==1 or d_state==1):
             return 1,player
         else:
             return -1,0
+        
     def show_chess_map(self):
         for i in range(self.height):
             print(self.chess_map[i])
 
-bb = board(9,9)
+class Tree:
+    def __init__(self,root,node,val,x,y,root_x,root_y):
+        self.x = x
+        self.y = y
+        self.root_x = root_x
+        self.root_y = root_y
+        self.val = val
+        self.root = root
+        self.node = []
+    
+    def add_node(self,node):
+        self.node.append(node)
+    
+    def add_root(self,root):
+        self.root = root
+            
+    
+
+class ai_chess:
+    
+    def __init__(self,player,deep,board):
+        self.mine = player
+        self.deep = deep
+        self.board = board
+        
+    def select(self,chess_map):
+        root_node = Tree(None,None,0,None,None,None,None)
+        for i in range(height):
+            for j in range(width):
+                AI.search(chess_map,root_node,1,0,j,i,j,i)
+        temp = [-1,-1,-1]
+        self.select_max_node(root_node,temp)
+        
+        return temp
+        
+    def select_max_node(self,node,max_node):
+        if(len(node.node)==0):
+            if(max_node[0]<node.val):
+                max_node[0] = node.val
+                max_node[1] = node.root_x
+                max_node[2] = node.root_y
+        for i in range(len(node.node)):
+            self.select_max_node(node.node[i],max_node)
+            
+    def search(self,chess_map,root,player,deep,x,y,root_x,root_y):
+        
+        state = copy.deepcopy(chess_map)
+        if(state[y][x]==0 and deep<self.deep):
+            state[y][x] = player
+            point = self.evaluate(state,player)+root.val
+            point_node = Tree(root,None,point,x,y,root_x,root_y,)
+            root.add_node(point_node)
+            for i in range(self.board.height):
+                for j in range(self.board.width):
+                    if(deep%2==1):
+                        self.search(copy.deepcopy(state),point_node,1,deep+1,j,i,root_x,root_y)
+                    else:
+                        self.search(copy.deepcopy(state),point_node,2,deep+1,j,i,root_x,root_y)
+                    
+    def evaluate(self,chess_board,player):
+        if(player==1):
+            return 1
+        else:
+            return -1
+    
+    def search_recursive(self,chess_board):
+        pass
+                
+   
+width,height = 5,5
+
+bb = board(width,height)
+AI = ai_chess(1,2,bb)
+#AI_choice = AI.select(bb.chess_map)
+'''
+while(True):
+    step = bb.steps
+    print(step)
+    if(step%2==1):
+        x,y = input().split()
+        a,b = bb.update(int(x),int(y),2)
+    else:
+        AI_choice = AI.select(bb.chess_map)
+        a,b = bb.update(AI_choice[1],AI_choice[2],1)
+    bb.show_chess_map()
+    if(a==1):
+        print('winner',b)
+        break
+'''    
+    
+
+
 for i in range(5):
-    a,b = bb.update(i+2,5-i,1)
+    a,b = bb.update(i,4,1)
     bb.show_chess_map()
     print(a,b)
+
             
             
             
