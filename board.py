@@ -50,11 +50,11 @@ class board:
         def check_lr_oblique(width,height,player):
             left = min(width,height)
             right = min(self.width-width,self.height-height)
-            #print(self.width,self.height,width,height,left,right)
+            print(left,right,width,height)
             if(left+right<5):
                 return -1,0
             else:
-                for i in range(left+right):
+                for i in range(left+right+1-5):
                     win = True
                     for j in range(5):
                         if(self.chess_map[height-left+i+j][width-left+i+j]!=player):
@@ -67,11 +67,11 @@ class board:
         def check_rl_oblique(width,height,player):
             right = min(self.width-width,height)
             left = min(width,self.height-height)
-            print(left,right,width,height)
+            #print(left,right,width,height)
             if(left+right<5):
                 return -1,0
             else:
-                for i in range(left+right):
+                for i in range(left+right+1-5):
                     win = True
                     for j in range(5):
                         if(self.chess_map[height-right-i+j][width+right+i-j]!=player):
@@ -83,9 +83,9 @@ class board:
         
         a_state,a_winner = check_straight(width,height,player)
         b_state,b_winner = check_line(width,height,player)
-        #c_state,c_winner = check_lr_oblique(width,height,player)
-        #d_state,d_winner = check_rl_oblique(width,height,player)
-        if(a_state==1 or b_state==1): #or c_state==1 or d_state==1):
+        c_state,c_winner = check_lr_oblique(width,height,player)
+        d_state,d_winner = check_rl_oblique(width,height,player)
+        if(a_state==1 or b_state==1 or c_state==1 or d_state==1): 
             return 1,player
         else:
             return -1,0
@@ -187,7 +187,7 @@ while(True):
 
 
 for i in range(5):
-    a,b = bb.update(i,4,1)
+    a,b = bb.update(i,i,1)
     bb.show_chess_map()
     print(a,b)
 
